@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<fx:Skin 
+  xmlns:core="library://core"
+  xmlns:fx="library://dart_flex/dart_flex.dart"
+  xmlns:m="library://dart_flex_master_detail/master_detail_example.dart"
+  xmlns:model="library://dart_flex_master_detail/model.dart">
+
+  <fx:VGroup id="verticalContainer" percentWidth="100" percentHeight="100">
+    <fx:HGroup percentWidth="100" percentHeight="100" />
+    <fx:DataGrid 
+          id="grid"
+          cssClasses="['container']"
+          percentWidth="100" percentHeight="100"
+          headerHeight="30"
+          rowHeight="34"
+          columnSpacing="0" rowSpacing="0"
+          dataProvider="{ personList }">
+        <fx:columns>
+            <core:List>
+                <fx:DataGridColumn percentWidth="100">
+                    <fx:labelHandler>{ (Person P) => '${P.firstName} ${P.lastName}'; }</fx:labelHandler>
+                    <fx:headerData factory="HeaderData.createSimple">
+                        <fx:constructorArguments>
+                            <core:String>Name</core:String>
+                        </fx:constructorArguments>
+                    </fx:headerData>
+                    <fx:headerItemRendererFactory>{HeaderItemRenderer}</fx:headerItemRendererFactory>
+                    <fx:columnItemRendererFactory>{LabelItemRenderer}</fx:columnItemRendererFactory>
+                </fx:DataGridColumn>
+                
+                <fx:DataGridColumn percentWidth="100">
+                    <fx:field>job</fx:field>
+                    <fx:headerData factory="HeaderData.createSimple">
+                        <fx:constructorArguments>
+                            <core:String>Job</core:String>
+                        </fx:constructorArguments>
+                    </fx:headerData>
+                    <fx:headerItemRendererFactory>{HeaderItemRenderer}</fx:headerItemRendererFactory>
+                    <fx:columnItemRendererFactory>{LabelItemRenderer}</fx:columnItemRendererFactory>
+                </fx:DataGridColumn>
+                
+                <fx:DataGridColumn percentWidth="100">
+                    <fx:field>gender</fx:field>
+                    <fx:headerData factory="HeaderData.createSimple">
+                        <fx:constructorArguments>
+                            <core:String>Gender</core:String>
+                        </fx:constructorArguments>
+                    </fx:headerData>
+                    <fx:headerItemRendererFactory>{HeaderItemRenderer}</fx:headerItemRendererFactory>
+                    <fx:columnItemRendererFactory>{LabelItemRenderer}</fx:columnItemRendererFactory>
+                </fx:DataGridColumn>
+                
+                <fx:DataGridColumn percentWidth="100">
+                    <fx:labelHandler>{ (Person P) => '${P.dateOfBirth.day}/${P.dateOfBirth.month}/${P.dateOfBirth.year}'; }</fx:labelHandler>
+                    <fx:headerData factory="HeaderData.createSimple">
+                        <fx:constructorArguments>
+                            <core:String>Date of birth</core:String>
+                        </fx:constructorArguments>
+                    </fx:headerData>
+                    <fx:headerItemRendererFactory>{HeaderItemRenderer}</fx:headerItemRendererFactory>
+                    <fx:columnItemRendererFactory>{LabelItemRenderer}</fx:columnItemRendererFactory>
+                </fx:DataGridColumn>
+                
+                <fx:DataGridColumn percentWidth="100">
+                    <fx:field>nationality</fx:field>
+                    <fx:headerData factory="HeaderData.createSimple">
+                        <fx:constructorArguments>
+                            <core:String>Nationality</core:String>
+                        </fx:constructorArguments>
+                    </fx:headerData>
+                    <fx:headerItemRendererFactory>{HeaderItemRenderer}</fx:headerItemRendererFactory>
+                    <fx:columnItemRendererFactory>{LabelItemRenderer}</fx:columnItemRendererFactory>
+                </fx:DataGridColumn>
+            </core:List>
+        </fx:columns>
+     </fx:DataGrid>
+  </fx:VGroup>
+  
+</fx:Skin>

@@ -1,0 +1,16 @@
+{
+  "name": "Test app",
+  "version": "1",
+  
+  "manifest_version": 2,
+  
+  "icons": {"128": "dart_icon.png"},
+  
+  "permissions": [{"fileSystem": ["write"]}],
+  
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  }
+}

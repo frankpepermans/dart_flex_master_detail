@@ -1,0 +1,17 @@
+name: dart_flex_master_detail
+version: 0.0.1
+description: A minimal web app for the developer that doesn’t want to be confused by too much going on.
+environment:
+  sdk: '>=1.0.0 <2.0.0'
+dependencies:
+  args: any
+  browser: any
+  dart_flex:
+    path: ../dart_flex
+  observe: any
+  script_inliner: any
+  shelf: any
+  shelf_cors: any
+transformers:
+- script_inliner
+- observe/transformer
