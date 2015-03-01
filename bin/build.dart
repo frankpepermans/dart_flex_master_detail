@@ -12,6 +12,8 @@ import 'package:shelf_cors/shelf_cors.dart' as shelf_cors;
 
 final String buildDirName = 'web_transformed';
 
+Process startProces, endProces;
+
 void main(List<String> args) {
   var parser = new ArgParser()
       ..addOption('port', abbr: 'p', defaultsTo: '8089');
@@ -31,6 +33,14 @@ void main(List<String> args) {
   io.serve(handler, 'localhost', port).then((server) {
     print('Serving at http://${server.address.host}:${server.port}');
   }).catchError((error) => print(error));
+  
+  Process.start('C:\\dart\\dart-sdk\\bin\\pub.bat', <String>['serve', 'web', '--port=8081'], workingDirectory: Directory.current.path).then(
+    (Process P) {
+      startProces = P;
+    
+      Process.start('C:\\dart\\chromium\\chrome.exe', <String>['http://localhost:8081/test_transform.html']);
+    }
+  );
 }
 
 Future<shelf.Response> _decodeJSON(shelf.Request request) {
@@ -59,6 +69,8 @@ void _makeBuildTarget(List<Map<String, String>> data) {
   final List<FileSystemEntity> L = libDir.listSync(recursive: true);
   final bool buildDirExists = buildDir.existsSync();
   
+  startProces.kill();
+  
   L.retainWhere(
     (FileSystemEntity FSE) {
       if (FSE.path.contains('packages') || FSE.path.contains('.git') || FSE.path.contains('.pub')) return false;
@@ -80,6 +92,12 @@ void _makeBuildTarget(List<Map<String, String>> data) {
         
         CD.createSync();
       }
+    }
+  );
+  
+  Process.start('C:\\dart\\dart-sdk\\bin\\pub.bat', <String>['serve', buildDirName, '--port=8082'], workingDirectory: Directory.current.path).then(
+    (Process P) {
+      Process.start('C:\\dart\\chromium\\chrome.exe', <String>['http://localhost:8082/index.html']);
     }
   );
 }
