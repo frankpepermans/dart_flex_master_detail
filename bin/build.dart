@@ -10,9 +10,11 @@ import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_cors/shelf_cors.dart' as shelf_cors;
 
+final String buildDirName = 'web_transformed';
+
 void main(List<String> args) {
   var parser = new ArgParser()
-      ..addOption('port', abbr: 'p', defaultsTo: '8081');
+      ..addOption('port', abbr: 'p', defaultsTo: '8089');
 
   var result = parser.parse(args);
 
@@ -51,29 +53,30 @@ Future<shelf.Response> _decodeJSON(shelf.Request request) {
   return C.future;
 }
 
-Future _makeBuildTarget(List<Map<String, String>> data) async {
-  String p = Directory.current.path;
-  final Directory libDir = new Directory.fromUri(Uri.parse('lib'));
-  final Directory buildDir = new Directory.fromUri(Uri.parse('build'));
-  final Directory webDir = new Directory.fromUri(Uri.parse('web'));
-  final Stream<FileSystemEntity> S = await libDir.list(recursive: true);
-  final List<FileSystemEntity> L = await S.toList();
-  final bool buildDirExists = await buildDir.exists();
+void _makeBuildTarget(List<Map<String, String>> data) {
+  final Directory libDir = Directory.current;
+  final Directory buildDir = new Directory.fromUri(Uri.parse(buildDirName));
+  final List<FileSystemEntity> L = libDir.listSync(recursive: true);
+  final bool buildDirExists = buildDir.existsSync();
   
   L.retainWhere(
-    (FileSystemEntity FSE) => !FSE.path.contains('packages')    
+    (FileSystemEntity FSE) {
+      if (FSE.path.contains('packages') || FSE.path.contains('.git') || FSE.path.contains('.pub')) return false;
+    
+      return true;
+    }
   );
   
-  if (buildDirExists) await buildDir.delete(recursive: true);
+  if (buildDirExists) buildDir.deleteSync(recursive: true);
   
-  await buildDir.create();
+  buildDir.createSync();
   
   L.forEach(
-    (FileSystemEntity FSE) {
-      if (FSE is File) {
-        _readFile(FSE, data);
+    (FileSystemEntity FSE) async {
+      if (FSE is File) {print(FSE.path);
+        await _readFile(FSE, data);
       } else if (FSE is Directory) {
-        final Directory CD = new Directory(FSE.path.replaceFirst('lib', 'build'));
+        final Directory CD = new Directory(_getBuildPath(FSE.path, Directory.current.path));
         
         CD.createSync();
       }
@@ -81,13 +84,15 @@ Future _makeBuildTarget(List<Map<String, String>> data) async {
   );
 }
 
-Future _readFile(File F, List<Map<String, String>> data) async {
+String _getBuildPath(String fromPath, String dirPath) => fromPath.replaceFirst(dirPath, '$dirPath\\$buildDirName');
+
+void _readFile(File F, List<Map<String, String>> data) {
   if (F.path.split('.').last.toLowerCase() == 'dart') {
-    final String codeBody = await F.readAsString();
+    final String codeBody = F.readAsStringSync();
     final RegExp exp = new RegExp(r"@Skin\('[^']+'\)");
     final RegExp exp2 = new RegExp(r"{");
     final Iterable<Match> matches = exp.allMatches(codeBody);
-    final File FC = await F.copy(F.path.replaceFirst('lib', 'build'));
+    final File FC = F.copySync(_getBuildPath(F.path, Directory.current.path));
     
     if ((matches != null) && matches.isNotEmpty) {
       final String skin = codeBody.substring(matches.first.start + 7, matches.first.end - 2);
@@ -99,7 +104,7 @@ Future _readFile(File F, List<Map<String, String>> data) async {
       final String afterSkin = codeBody.substring(matches.first.end);
       final String updatedCodeBody = beforeSkin + afterSkin.replaceFirst(exp2, '{${new String.fromCharCode(10)}${new String.fromCharCode(9)}${codeToInject['code']}');
       
-      await FC.writeAsString(updatedCodeBody);
+      FC.writeAsStringSync(updatedCodeBody);
     }
-  }
+  } else F.copySync(_getBuildPath(F.path, Directory.current.path));
 }
