@@ -37,6 +37,10 @@ h1, p {
   box-shadow:         5px 5px 5px rgba(50, 50, 50, 0.4);
 }
 
+._EditableText {
+  color: #333;
+}
+
 ._SpriteSheet {
   float: right;
   margin: 10px 0px 0px 0px;

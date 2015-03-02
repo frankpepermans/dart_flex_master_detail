@@ -129,8 +129,12 @@ class Scanner {
       final String xmlSource = xmlValue.substring(1, xmlValue.length - 1);
       final List<String> dotPath = xmlSource.split('.');
       final String genericMethodName = '__scope_fnc_local_${++_localScopeCount}';
-      mirrors.ClassMirror rCM = mirrors.reflectClass(expectedType);
+      mirrors.ClassMirror rCM;
       bool isClassFactory = false;
+      
+      try {
+        rCM = mirrors.reflectClass(expectedType);
+      } catch (error) {}
 
       while (rCM != null) {
         rCM.metadata.forEach(
@@ -149,7 +153,7 @@ class Scanner {
     }
 
     switch (expectedType) {
-      case Symbol: return new _SourceResult("const Symbol('${xmlValue}')", null, null);
+      case Symbol: return new _SourceResult("#${xmlValue}", null, null);
       case String: return new _SourceResult("'${xmlValue}'", null, null);
       case int: return new _SourceResult(int.parse(xmlValue).toString(), null, null);
       case double:
@@ -378,8 +382,8 @@ class Scanner {
                     
                     fncBodyList.add('if (__scope_var_local_${_localScopeCount} != null) __scope_var_local_${_localScopeCount}.cancel();');
                     
-                    if (nullChecks.isNotEmpty) fncBodyList.add('if (${nullChecks.join(' && ')}) __scope_var_local_${_localScopeCount} = ${targets.join('.')}.changes.listen((_) { $nullCondition $dotSetter = ${genericMethodName}(null); });');
-                    else fncBodyList.add('__scope_var_local_${_localScopeCount} = ${targets.join('.')}.changes.listen((_) { $nullCondition $dotSetter = ${genericMethodName}(null); });');
+                    if (nullChecks.isNotEmpty) fncBodyList.add('if (${nullChecks.join(' && ')}) __scope_var_local_${_localScopeCount} = ${targets.join('.')}.changes.listen((_) { $nullCondition $dotSetter = ${genericMethodName}(null); else ${genericMethodName}(null); });');
+                    else fncBodyList.add('__scope_var_local_${_localScopeCount} = ${targets.join('.')}.changes.listen((_) { $nullCondition $dotSetter = ${genericMethodName}(null); else ${genericMethodName}(null); });');
                   }
                   
                   if (G.listener != null) {
@@ -387,11 +391,13 @@ class Scanner {
                     
                     fncBodyList.add('if (__scope_var_local_${_localScopeCount} != null) __scope_var_local_${_localScopeCount}.cancel();');
                     
-                    if (nullChecks.isNotEmpty) fncBodyList.add('if (${nullChecks.join(' && ')}) __scope_var_local_${_localScopeCount} = ${targets.join('.')}.${G.listener.name}.listen((_) { $nullCondition $dotSetter = ${genericMethodName}(null); });');
-                    else fncBodyList.add('__scope_var_local_${_localScopeCount} = ${targets.join('.')}.${G.listener.name}.listen((_) { $nullCondition $dotSetter = ${genericMethodName}(null); });');
+                    if (nullChecks.isNotEmpty) fncBodyList.add('if (${nullChecks.join(' && ')}) __scope_var_local_${_localScopeCount} = ${targets.join('.')}.${G.listener.name}.listen((_) { $nullCondition $dotSetter = ${genericMethodName}(null); else ${genericMethodName}(null); });');
+                    else fncBodyList.add('__scope_var_local_${_localScopeCount} = ${targets.join('.')}.${G.listener.name}.listen((_) { $nullCondition $dotSetter = ${genericMethodName}(null); else ${genericMethodName}(null); });');
                   }
+                  
+                  final mirrors.TypeMirror TM = mirrors.reflectType(G.expectedType);
 
-                  CM = mirrors.reflectType(G.expectedType) as mirrors.ClassMirror;
+                  if (TM is mirrors.ClassMirror) CM = TM;
                 }
               }
           );

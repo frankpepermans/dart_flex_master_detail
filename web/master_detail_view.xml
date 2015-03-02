@@ -6,7 +6,10 @@
   xmlns:model="library://dart_flex_master_detail/model.dart">
 
   <fx:VGroup id="verticalContainer" percentWidth="100" percentHeight="100">
-    <fx:HGroup percentWidth="100" percentHeight="100" />
+    <fx:VGroup percentWidth="100" percentHeight="100">
+      <fx:EditableLabelItemRenderer data="{grid.selectedItem}" field="firstName" cssClasses="['fx-input-field']" width="400" height="26" />
+      <fx:EditableLabelItemRenderer data="{grid.selectedItem}" field="lastName" cssClasses="['fx-input-field']" width="400" height="26" />
+    </fx:VGroup>
     <fx:DataGrid 
           id="grid"
           cssClasses="['container']"

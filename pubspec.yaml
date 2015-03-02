@@ -7,7 +7,7 @@ dependencies:
   args: any
   browser: any
   dart_flex:
-    path: C:\work\production\igindo\dart\dart_flex
+    path: C:\Users\frank.pepermans\IdeaProjects\dart_flex
   observe: any
   script_inliner: any
   shelf: any

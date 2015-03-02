@@ -20,4 +20,15 @@ class Person extends ChangeNotifier {
     return null;
   }
   
+  void operator []=(Symbol type, dynamic value) {
+    if (type == #firstName) firstName = value;
+    else if (type == #lastName) lastName = value;
+    else if (type == #nationality) nationality = value;
+    else if (type == #job) job = value;
+    else if (type == #gender) gender = value;
+    else if (type == #dateOfBirth) dateOfBirth = value;
+    
+    return null;
+  }
+  
 }

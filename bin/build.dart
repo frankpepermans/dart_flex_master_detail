@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:args/args.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -11,8 +12,10 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_cors/shelf_cors.dart' as shelf_cors;
 
 final String buildDirName = 'web_transformed';
+final Random rand = new Random();
+final int portNum = rand.nextInt(10) + 8090;
 
-Process startProces, endProces;
+Process startupProcess;
 
 void main(List<String> args) {
   var parser = new ArgParser()
@@ -34,11 +37,11 @@ void main(List<String> args) {
     print('Serving at http://${server.address.host}:${server.port}');
   }).catchError((error) => print(error));
   
-  Process.start('C:\\dart\\dart-sdk\\bin\\pub.bat', <String>['serve', 'web', '--port=8081'], workingDirectory: Directory.current.path).then(
+  Process.start('C:\\dart\\dart-sdk\\bin\\pub.bat', <String>['serve', '--port=8082', '--mode=debug', 'web'], workingDirectory: Directory.current.path).then(
     (Process P) {
-      startProces = P;
+      startupProcess = P;
     
-      Process.start('C:\\dart\\chromium\\chrome.exe', <String>['http://localhost:8081/test_transform.html']);
+      Process.runSync('C:\\dart\\chromium\\chrome.exe', <String>['http://localhost:8082/test_transform.html']);
     }
   );
 }
@@ -69,11 +72,14 @@ void _makeBuildTarget(List<Map<String, String>> data) {
   final List<FileSystemEntity> L = libDir.listSync(recursive: true);
   final bool buildDirExists = buildDir.existsSync();
   
-  startProces.kill();
-  
   L.retainWhere(
     (FileSystemEntity FSE) {
-      if (FSE.path.contains('packages') || FSE.path.contains('.git') || FSE.path.contains('.pub')) return false;
+      if (
+          FSE.path.contains(buildDirName) ||
+          FSE.path.contains('packages') || 
+          FSE.path.contains('.git') || 
+          FSE.path.contains('.pub')
+      ) return false;
     
       return true;
     }
@@ -84,9 +90,9 @@ void _makeBuildTarget(List<Map<String, String>> data) {
   buildDir.createSync();
   
   L.forEach(
-    (FileSystemEntity FSE) async {
+    (FileSystemEntity FSE) {
       if (FSE is File) {print(FSE.path);
-        await _readFile(FSE, data);
+        _readFile(FSE, data);
       } else if (FSE is Directory) {
         final Directory CD = new Directory(_getBuildPath(FSE.path, Directory.current.path));
         
@@ -95,10 +101,12 @@ void _makeBuildTarget(List<Map<String, String>> data) {
     }
   );
   
-  Process.start('C:\\dart\\dart-sdk\\bin\\pub.bat', <String>['serve', buildDirName, '--port=8082'], workingDirectory: Directory.current.path).then(
-    (Process P) {
-      Process.start('C:\\dart\\chromium\\chrome.exe', <String>['http://localhost:8082/index.html']);
-    }
+  
+  final bool isStopped = startupProcess.kill();
+  final String generatedDir = _getBuildPath(Directory.current.path, Directory.current.path);
+  
+  Process.start('C:\\dart\\dart-sdk\\bin\\pub.bat', <String>['serve', '--port=8083', '--mode=debug', 'web'], workingDirectory: generatedDir).then(
+    (Process P) => Process.runSync('C:\\dart\\chromium\\chrome.exe', <String>['http://localhost:8083/index.html'])  
   );
 }
 

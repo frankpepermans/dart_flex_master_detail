@@ -9,7 +9,7 @@ void main() {
   S.getCodeBlocks().then(sendResults);
 }
 
-void sendResults(String codeBlocks) {print(codeBlocks);
+void sendResults(String codeBlocks) {
   HttpRequest.request(
     'http://localhost:8089/', 
     method: 'POST', 
@@ -18,8 +18,6 @@ void sendResults(String codeBlocks) {print(codeBlocks);
   ).then(
     (HttpRequest request) {
       print(request.statusText);
-      
-      window.close();
     }
   );
 }
